@@ -1,4 +1,4 @@
-import { Observable } from '../core/Observable';
+import { Observable } from "../core/Observable";
 
 /**
  * of() - Create an Observable that emits a sequence of values
@@ -37,6 +37,13 @@ import { Observable } from '../core/Observable';
  * - If subscriber is closed/stopped during emission, stop emitting
  */
 export function of<T>(...values: T[]): Observable<T> {
-  // TODO: Implement of()
-  throw new Error('Not implemented');
+  const s = new Observable((s) => {
+    for (const v of values) {
+      if (s.closed) break;
+      s.next(v);
+    }
+    if (!s.closed) s.complete();
+  });
+
+  return s;
 }

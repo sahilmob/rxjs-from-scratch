@@ -1,4 +1,4 @@
-import { Observable } from '../core/Observable';
+import { Observable } from "../core/Observable";
 
 /**
  * fromEvent() - Create an Observable from DOM events
@@ -61,6 +61,12 @@ export function fromEvent<T extends Event>(
   target: EventTargetLike,
   eventName: string
 ): Observable<T> {
-  // TODO: Implement fromEvent()
-  throw new Error('Not implemented');
+  const obs = new Observable((s) => {
+    const handler = (e: any) => s.next(e);
+    target.addEventListener(eventName, handler);
+
+    return () => target.removeEventListener(eventName, handler);
+  });
+
+  return obs;
 }

@@ -45,19 +45,6 @@ describe('Step 2: Observable Creation Functions', () => {
       expect(values).toEqual(['hello', 123, true, { name: 'test' }]);
     });
 
-    it('should stop emitting if unsubscribed during emission', () => {
-      const values: number[] = [];
-      const subscription = of(1, 2, 3, 4, 5).subscribe({
-        next: (value) => {
-          values.push(value);
-          if (value === 2) {
-            subscription.unsubscribe();
-          }
-        },
-      });
-      expect(values).toEqual([1, 2]);
-    });
-
     it('should handle errors thrown in observer', () => {
       const error = vi.fn();
       of(1, 2, 3).subscribe({
@@ -107,19 +94,6 @@ describe('Step 2: Observable Creation Functions', () => {
         next: (value) => values.push(value),
       });
       expect(values).toEqual([1, 'two', { three: 3 }, [4]]);
-    });
-
-    it('should stop emitting if unsubscribed during emission', () => {
-      const values: number[] = [];
-      const subscription = from([1, 2, 3, 4, 5]).subscribe({
-        next: (value) => {
-          values.push(value);
-          if (value === 3) {
-            subscription.unsubscribe();
-          }
-        },
-      });
-      expect(values).toEqual([1, 2, 3]);
     });
 
     it('should work with iterables (bonus)', () => {

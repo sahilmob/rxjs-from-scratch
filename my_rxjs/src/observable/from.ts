@@ -1,4 +1,4 @@
-import { Observable } from '../core/Observable';
+import { Observable } from "../core/Observable";
 
 /**
  * from() - Convert various types into an Observable
@@ -47,6 +47,15 @@ import { Observable } from '../core/Observable';
  * For now, just support arrays. Bonus: support iterables with Symbol.iterator
  */
 export function from<T>(input: ArrayLike<T> | Iterable<T>): Observable<T> {
-  // TODO: Implement from()
-  throw new Error('Not implemented');
+  const obs = new Observable((s) => {
+    if (Array.isArray(input) || Symbol.iterator in Object(input)) {
+      for (const value of input as Iterable<T>) {
+        if (s.closed) break; // Stop if unsubscribed
+        s.next(value);
+      }
+    }
+
+    if (!s.closed) s.complete();
+  });
+  return obs;
 }
