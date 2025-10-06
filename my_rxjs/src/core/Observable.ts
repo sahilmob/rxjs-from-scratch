@@ -1,6 +1,7 @@
 import { Subscriber } from "./Subscriber";
 import { Subscription } from "./Subscription";
 import type { PartialObserver, TeardownLogic } from "./types";
+import type { OperatorFunction } from "./pipe";
 
 /**
  * Observable class
@@ -83,5 +84,69 @@ export class Observable<T> {
     }
 
     return subscriber;
+  }
+
+  /**
+   * TODO: Implement the pipe method
+   *
+   * The pipe method allows chaining operators on an Observable.
+   * It's syntactic sugar that makes code more readable.
+   *
+   * Example:
+   *   observable.pipe(
+   *     map(x => x * 2),
+   *     filter(x => x > 5)
+   *   )
+   *
+   * Instead of:
+   *   filter(x => x > 5)(map(x => x * 2)(observable))
+   *
+   * @param operators - Variable number of operator functions
+   * @returns A new Observable with all operators applied
+   *
+   * Implementation guide:
+   * 1. Start with `this` as the source Observable
+   * 2. Apply each operator in sequence
+   * 3. Return the final transformed Observable
+   *
+   * Hint: Use Array.reduce() to apply operators left-to-right
+   *
+   * Pattern:
+   * pipe(): Observable<T>;
+   * pipe<A>(op1: OperatorFunction<T, A>): Observable<A>;
+   * pipe<A, B>(op1: OperatorFunction<T, A>, op2: OperatorFunction<A, B>): Observable<B>;
+   * etc.
+   */
+
+  // Overloads for type safety
+  pipe(): Observable<T>;
+  pipe<A>(op1: OperatorFunction<T, A>): Observable<A>;
+  pipe<A, B>(
+    op1: OperatorFunction<T, A>,
+    op2: OperatorFunction<A, B>
+  ): Observable<B>;
+  pipe<A, B, C>(
+    op1: OperatorFunction<T, A>,
+    op2: OperatorFunction<A, B>,
+    op3: OperatorFunction<B, C>
+  ): Observable<C>;
+  pipe<A, B, C, D>(
+    op1: OperatorFunction<T, A>,
+    op2: OperatorFunction<A, B>,
+    op3: OperatorFunction<B, C>,
+    op4: OperatorFunction<C, D>
+  ): Observable<D>;
+  pipe<A, B, C, D, E>(
+    op1: OperatorFunction<T, A>,
+    op2: OperatorFunction<A, B>,
+    op3: OperatorFunction<B, C>,
+    op4: OperatorFunction<C, D>,
+    op5: OperatorFunction<D, E>
+  ): Observable<E>;
+
+  // Implementation
+  pipe(...operators: OperatorFunction<any, any>[]): Observable<any> {
+    // TODO: Implement pipe method
+    throw new Error('Not implemented');
   }
 }
