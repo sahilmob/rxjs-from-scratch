@@ -1,4 +1,4 @@
-import type { SubscriptionLike, TeardownLogic, Unsubscribable } from './types';
+import type { SubscriptionLike, TeardownLogic, Unsubscribable } from "./types";
 
 /**
  * Subscription class
@@ -22,7 +22,8 @@ export class Subscription implements SubscriptionLike {
    * TODO: Create a private property to store child subscriptions/teardown functions
    * Hint: You can use a Set or Array to store them
    */
-  // private _teardowns: ???
+  private _teardowns: Set<Function>;
+  private _teardown?: Function;
 
   /**
    * TODO: Implement the constructor
@@ -33,7 +34,9 @@ export class Subscription implements SubscriptionLike {
    * 1. Accept an optional teardown function parameter
    * 2. Store it so it can be called during unsubscribe
    */
-  constructor(/* Add parameters here */) {
+  constructor(teardown?: Function) {
+    this._teardowns = new Set();
+    this._teardown = teardown;
     // TODO: Implement constructor
   }
 
@@ -51,6 +54,11 @@ export class Subscription implements SubscriptionLike {
    */
   unsubscribe(): void {
     // TODO: Implement unsubscribe logic
+    if (this.closed) return;
+    this.closed = true;
+    this._teardown?.();
+    this._teardowns.forEach((t) => t());
+    this._teardowns.clear();
   }
 
   /**
@@ -69,6 +77,23 @@ export class Subscription implements SubscriptionLike {
    * Hint: Check if teardown has an 'unsubscribe' method to handle Subscription objects
    */
   add(teardown: TeardownLogic | Unsubscribable): void {
+    if (this.closed) {
+      if (teardown === undefined || teardown === null) {
+        return;
+      } else if (typeof teardown === "function") {
+        teardown();
+      } else {
+        teardown.unsubscribe();
+      }
+    } else {
+      if (teardown === undefined || teardown === null) {
+        return;
+      } else if (typeof teardown === "function") {
+        this._teardowns.add(teardown);
+      } else {
+        this._teardowns.add(() => teardown.unsubscribe());
+      }
+    }
     // TODO: Implement add logic
   }
 
@@ -79,7 +104,14 @@ export class Subscription implements SubscriptionLike {
    *
    * @param teardown - The teardown to remove
    */
-  // remove(teardown: TeardownLogic | Unsubscribable): void {
-  //   // TODO: Optional implementation
-  // }
+  remove(teardown: TeardownLogic | Unsubscribable): void {
+    // TODO: Optional implementation
+    if (teardown === undefined || teardown === null) {
+      return;
+    } else if (typeof teardown === "function") {
+      this._teardowns.delete(teardown);
+    } else {
+      this._teardowns.delete(() => teardown.unsubscribe());
+    }
+  }
 }

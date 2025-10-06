@@ -1,5 +1,5 @@
-import { Subscription } from './Subscription';
-import type { Observer, PartialObserver } from './types';
+import { Subscription } from "./Subscription";
+import type { Observer, PartialObserver } from "./types";
 
 /**
  * Subscriber class
@@ -19,13 +19,13 @@ export class Subscriber<T> extends Subscription implements Observer<T> {
    * A subscriber is "stopped" after error() or complete() is called
    * Once stopped, it should ignore any further next() calls
    */
-  // protected isStopped: boolean = ???
+  protected isStopped: boolean = false;
 
   /**
    * TODO: Create a property to hold the destination observer
    * This is where we forward the notifications (next/error/complete)
    */
-  // protected destination: ???
+  protected destination: Observer<T>;
 
   /**
    * TODO: Implement the constructor
@@ -47,8 +47,12 @@ export class Subscriber<T> extends Subscription implements Observer<T> {
    * - If it's null/undefined, create a noop observer
    * - Wrap each method in try-catch for safety
    */
-  constructor(observerOrNext?: PartialObserver<T> | ((value: T) => void) | null) {
+  constructor(
+    observerOrNext?: PartialObserver<T> | ((value: T) => void) | null
+  ) {
+    super();
     // TODO: Implement constructor
+    this.destination = createSafeObserver(observerOrNext);
   }
 
   /**
@@ -64,6 +68,8 @@ export class Subscriber<T> extends Subscription implements Observer<T> {
    */
   next(value: T): void {
     // TODO: Implement next
+    if (this.isStopped || this.closed) return;
+    this.destination.next(value);
   }
 
   /**
@@ -80,6 +86,10 @@ export class Subscriber<T> extends Subscription implements Observer<T> {
    */
   error(err: any): void {
     // TODO: Implement error
+    if (this.isStopped) return;
+    this.isStopped = true;
+    this.destination.error(err);
+    this.unsubscribe();
   }
 
   /**
@@ -96,6 +106,10 @@ export class Subscriber<T> extends Subscription implements Observer<T> {
    */
   complete(): void {
     // TODO: Implement complete
+    if (this.isStopped) return;
+    this.isStopped = true;
+    this.destination.complete();
+    this.unsubscribe();
   }
 }
 
@@ -121,10 +135,29 @@ export function createSafeObserver<T>(
   observerOrNext?: PartialObserver<T> | ((value: T) => void) | null
 ): Observer<T> {
   // TODO: Implement this helper function
-  // For now, return a basic noop observer
-  return {
-    next: () => {},
-    error: (err) => { throw err; },
-    complete: () => {}
-  };
+  if (observerOrNext === null || observerOrNext === undefined) {
+    return {
+      next: () => {},
+      error: () => {},
+      complete: () => {},
+    };
+  } else if (typeof observerOrNext === "function") {
+    return {
+      next: observerOrNext,
+      error: (err) => {
+        throw err;
+      },
+      complete: () => {},
+    };
+  } else {
+    return {
+      next: observerOrNext.next || (() => {}),
+      error:
+        observerOrNext.error ||
+        ((e) => {
+          throw e;
+        }),
+      complete: observerOrNext.complete || (() => {}),
+    };
+  }
 }

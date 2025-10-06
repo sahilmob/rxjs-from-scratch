@@ -1,6 +1,6 @@
-import { Subscriber } from './Subscriber';
-import { Subscription } from './Subscription';
-import type { PartialObserver, TeardownLogic } from './types';
+import { Subscriber } from "./Subscriber";
+import { Subscription } from "./Subscription";
+import type { PartialObserver, TeardownLogic } from "./types";
 
 /**
  * Observable class
@@ -20,7 +20,7 @@ export class Observable<T> {
    * TODO: Store the subscribe function
    * This function defines the Observable's behavior when subscribed to
    */
-  // protected _subscribe: ???
+  protected _subscribe?: Function;
 
   /**
    * TODO: Implement the constructor
@@ -44,7 +44,7 @@ export class Observable<T> {
    * 1. Store the subscribe function for later use
    */
   constructor(subscribe?: (subscriber: Subscriber<T>) => TeardownLogic) {
-    // TODO: Implement constructor
+    this._subscribe = subscribe;
   }
 
   /**
@@ -69,9 +69,19 @@ export class Observable<T> {
    * Important: Wrap the _subscribe call in try-catch and call subscriber.error()
    * if an exception is thrown.
    */
-  subscribe(observerOrNext?: PartialObserver<T> | ((value: T) => void) | null): Subscription {
+  subscribe(
+    observerOrNext?: PartialObserver<T> | ((value: T) => void) | null
+  ): Subscription {
     // TODO: Implement subscribe
-    // For now, return an empty subscription
-    return new Subscription();
+    // if (!observerOrNext) return
+    const subscriber = new Subscriber(observerOrNext);
+    try {
+      const unsub = this._subscribe?.(subscriber);
+      subscriber.add(unsub);
+    } catch (error) {
+      subscriber.error(error);
+    }
+
+    return subscriber;
   }
 }

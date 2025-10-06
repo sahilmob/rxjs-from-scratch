@@ -4,12 +4,12 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['my_signals/tests/**/*.test.ts'],
+    include: ['my_rxjs/tests/**/*.test.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['my_signals/src/**/*.ts'],
-      exclude: ['my_signals/src/index.ts', 'my_signals/src/**/*.test.ts']
+      include: ['my_rxjs/src/**/*.ts'],
+      exclude: ['my_rxjs/src/index.ts', 'my_rxjs/src/**/*.test.ts']
     }
   }
 });
