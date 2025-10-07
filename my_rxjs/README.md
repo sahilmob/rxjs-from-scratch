@@ -19,7 +19,8 @@ my_rxjs/
 │   │   ├── from.ts        # Convert arrays/iterables
 │   │   └── fromEvent.ts   # DOM event observables
 │   │
-│   ├── operators/         # Transformation & filtering operators (coming soon)
+│   ├── operators/         # Transformation & filtering operators
+│   │   └── map.ts         # Transform values with projection function
 │   ├── subjects/          # Subjects (coming soon)
 │   └── index.ts           # Public API exports
 │
@@ -32,6 +33,7 @@ my_rxjs/
 ## Implementation Status
 
 ### ✅ Phase 1: Foundation (Complete - 64/64 tests passing)
+### 🔄 Phase 2: Transformation Operators (In Progress - 20/20 tests passing)
 
 #### Step 1: Observable & Subscriber Basics
 **Files:** `Observable.ts`, `Subscriber.ts`, `Subscription.ts`, `types.ts`
@@ -122,6 +124,71 @@ transform(of(1, 2, 3)).subscribe(console.log); // 2, 6
 - TypeScript type inference through chains
 - Immutability (new Observable each time)
 
+#### Step 4: Map Operator
+**Files:** `operators/map.ts`
+
+The fundamental transformation operator:
+- Transform each emitted value using projection function
+- Support index parameter (bonus feature)
+- Handle errors from projection function
+- Type transformation (T → R)
+
+**Key Patterns:**
+```typescript
+// Basic transformation
+of(1, 2, 3)
+  .pipe(map(x => x * 2))
+  .subscribe(console.log); // 2, 4, 6
+
+// Type transformation
+of(1, 2, 3)
+  .pipe(map(x => `Value: ${x}`))
+  .subscribe(console.log); // "Value: 1", "Value: 2", "Value: 3"
+
+// With index
+of('a', 'b', 'c')
+  .pipe(map((value, index) => `${index}: ${value}`))
+  .subscribe(console.log); // "0: a", "1: b", "2: c"
+
+// Chaining maps
+of(1, 2, 3)
+  .pipe(
+    map(x => x + 1),  // 2, 3, 4
+    map(x => x * 2),  // 4, 6, 8
+    map(x => `${x}`)  // "4", "6", "8"
+  )
+  .subscribe(console.log);
+```
+
+**Operator Pattern (used by all operators):**
+```typescript
+export function operatorName<T, R>(config): OperatorFunction<T, R> {
+  return (source: Observable<T>) => {
+    return new Observable<R>(subscriber => {
+      return source.subscribe({
+        next: value => {
+          try {
+            // Transform value
+            subscriber.next(transformed);
+          } catch (err) {
+            subscriber.error(err);
+          }
+        },
+        error: err => subscriber.error(err),
+        complete: () => subscriber.complete()
+      }).unsubscribe;
+    });
+  };
+}
+```
+
+**Key Learnings:**
+- Higher-order function pattern
+- Error handling in transformations
+- State management (index tracking)
+- Subscription forwarding for cleanup
+- Type safety with generics
+
 ---
 
 ## Running Tests
@@ -134,6 +201,7 @@ npm test
 npm test -- step1-core
 npm test -- step2-creation
 npm test -- step3-pipe
+npm test -- step4-map
 
 # Watch mode
 npm run test:watch
@@ -238,8 +306,8 @@ for (const v of values) {
 ## Next Steps
 
 **Phase 2: Transformation Operators** (In Progress)
-- Step 4: Map operator
-- Step 5: Filter operator
+- ✅ Step 4: Map operator
+- Step 5: Filter operator (next)
 - Step 6: Scan & Reduce operators
 
 See [CLAUDE.md](../CLAUDE.md) for full roadmap and progress.
@@ -258,7 +326,8 @@ See [CLAUDE.md](../CLAUDE.md) for full roadmap and progress.
 | Core Observable | 24 | ✅ All passing |
 | Creation Functions | 22 | ✅ All passing |
 | Pipe Operator | 18 | ✅ All passing |
-| **Total** | **64** | **✅ 100%** |
+| Map Operator | 20 | ✅ All passing |
+| **Total** | **84** | **✅ 100%** |
 
 ---
 
