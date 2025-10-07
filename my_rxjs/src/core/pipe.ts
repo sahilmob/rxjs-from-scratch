@@ -21,7 +21,7 @@
  */
 export type OperatorFunction<T, R> = (source: Observable<T>) => Observable<R>;
 
-import { Observable } from './Observable';
+import { Observable } from "./Observable";
 
 /**
  * TODO: Implement the pipe() function with overloads
@@ -86,5 +86,5 @@ export function pipe(
   // TODO: Implement pipe
   // If no operators, return identity function
   // Otherwise, compose all operators left-to-right
-  throw new Error('Not implemented');
+  return (source) => operators.reduce((acc, curr) => curr(acc), source);
 }

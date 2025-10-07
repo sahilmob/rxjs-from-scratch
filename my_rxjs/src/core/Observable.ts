@@ -146,7 +146,6 @@ export class Observable<T> {
 
   // Implementation
   pipe(...operators: OperatorFunction<any, any>[]): Observable<any> {
-    // TODO: Implement pipe method
-    throw new Error('Not implemented');
+    return operators.reduce((acc, curr) => curr(acc), this as Observable<any>);
   }
 }
