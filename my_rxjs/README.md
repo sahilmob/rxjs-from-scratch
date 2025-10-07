@@ -23,20 +23,29 @@ my_rxjs/
 │   │   ├── map.ts         # Transform values with projection function
 │   │   ├── filter.ts      # Conditionally emit values based on predicate
 │   │   ├── scan.ts        # Accumulate with intermediate emissions
-│   │   └── reduce.ts      # Accumulate with final emission only
+│   │   ├── reduce.ts      # Accumulate with final emission only
+│   │   ├── take.ts        # Take first N values then complete
+│   │   ├── skip.ts        # Skip first N values, emit rest
+│   │   ├── first.ts       # Emit only first value
+│   │   └── last.ts        # Buffer last value, emit on complete
 │   ├── subjects/          # Subjects (coming soon)
 │   └── index.ts           # Public API exports
 │
-└── tests/                 # Vitest test suites
-    ├── step1-core.test.ts      # 24 tests - Core Observable
-    ├── step2-creation.test.ts  # 22 tests - Creation functions
-    └── step3-pipe.test.ts      # 18 tests - Pipe operator
+└── tests/                           # Vitest test suites
+    ├── step1-core.test.ts           # 24 tests - Core Observable
+    ├── step2-creation.test.ts       # 22 tests - Creation functions
+    ├── step3-pipe.test.ts           # 18 tests - Pipe operator
+    ├── step4-map.test.ts            # 20 tests - Map operator
+    ├── step5-filter.test.ts         # 30 tests - Filter operator
+    ├── step6-scan-reduce.test.ts    # 33 tests - Scan & Reduce
+    └── step7-take-skip-first-last.test.ts  # 38 tests - Take, Skip, First, Last
 ```
 
 ## Implementation Status
 
 ### ✅ Phase 1: Foundation (Complete - 64/64 tests passing)
-### ✅ Phase 2: Transformation Operators (Complete - 83/83 tests passing)
+### ✅ Phase 2: Transformation Operators (Complete - 57/57 tests passing)
+### 🚧 Phase 3: Filtering & Utility Operators (In Progress - 38/38 tests passing)
 
 #### Step 1: Observable & Subscriber Basics
 **Files:** `Observable.ts`, `Subscriber.ts`, `Subscription.ts`, `types.ts`
@@ -328,6 +337,7 @@ npm test -- step3-pipe
 npm test -- step4-map
 npm test -- step5-filter
 npm test -- step6-scan-reduce
+npm test -- step7-take-skip-first-last
 
 # Watch mode
 npm run test:watch
@@ -429,15 +439,67 @@ for (const v of values) {
 }
 ```
 
+#### Step 7: Take, Skip, First, Last
+**Files:** `operators/take.ts`, `operators/skip.ts`, `operators/first.ts`, `operators/last.ts`
+
+Control which values are emitted:
+- First operators with early completion
+- Buffering pattern for last value
+- Stateful counting with closure variables
+- Falsy value handling with hasValue flag
+
+**Key Patterns:**
+```typescript
+// Take first N values
+of(1, 2, 3, 4, 5)
+  .pipe(take(3))
+  .subscribe(console.log); // 1, 2, 3
+
+// Skip first N values
+of(1, 2, 3, 4, 5)
+  .pipe(skip(2))
+  .subscribe(console.log); // 3, 4, 5
+
+// Get first value only
+of(1, 2, 3, 4, 5)
+  .pipe(first())
+  .subscribe(console.log); // 1
+
+// Get last value only
+of(1, 2, 3, 4, 5)
+  .pipe(last())
+  .subscribe(console.log); // 5
+
+// Get middle elements (combine skip + take)
+of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+  .pipe(
+    skip(3),   // Skip 1,2,3 → 4-10
+    take(4)    // Take 4,5,6,7
+  )
+  .subscribe(console.log); // 4, 5, 6, 7
+```
+
+**Operator Comparison:**
+| Operator | Completes Early? | State | Use Case |
+|----------|------------------|-------|----------|
+| `take(n)` | ✅ After N | Counter | Limit emissions |
+| `skip(n)` | ❌ No | Counter | Skip initial values |
+| `first()` | ✅ After 1 | Flag | Get first value |
+| `last()` | ❌ No | Buffer | Get final value |
+
+**Key Learnings:**
+- Early completion pattern (`subscriber.complete()`)
+- Counter strategies (increment vs decrement)
+- Buffering with hasValue flag (handles falsy values like 0, false, "")
+- Closure variables for per-subscription state
+
+---
+
 ## Next Steps
 
-**Phase 2: Transformation Operators** (Complete)
-- ✅ Step 4: Map operator
-- ✅ Step 5: Filter operator
-- ✅ Step 6: Scan & Reduce operators
-
-**Phase 3: Filtering & Utility Operators** (Next)
-- Step 7: Take, Skip, and First/Last
+**Phase 3: Filtering & Utility Operators** (In Progress)
+- ✅ Step 7: Take, Skip, First, Last
+- Step 8: Distinct & DistinctUntilChanged (Next)
 
 See [CLAUDE.md](../CLAUDE.md) for full roadmap and progress.
 
@@ -458,7 +520,8 @@ See [CLAUDE.md](../CLAUDE.md) for full roadmap and progress.
 | Map Operator | 20 | ✅ All passing |
 | Filter Operator | 30 | ✅ All passing |
 | Scan & Reduce | 33 | ✅ All passing |
-| **Total** | **147** | **✅ 100%** |
+| Take, Skip, First, Last | 38 | ✅ All passing |
+| **Total** | **185** | **✅ 100%** |
 
 ---
 
