@@ -21,7 +21,9 @@ my_rxjs/
 │   │
 │   ├── operators/         # Transformation & filtering operators
 │   │   ├── map.ts         # Transform values with projection function
-│   │   └── filter.ts      # Conditionally emit values based on predicate
+│   │   ├── filter.ts      # Conditionally emit values based on predicate
+│   │   ├── scan.ts        # Accumulate with intermediate emissions
+│   │   └── reduce.ts      # Accumulate with final emission only
 │   ├── subjects/          # Subjects (coming soon)
 │   └── index.ts           # Public API exports
 │
@@ -34,7 +36,7 @@ my_rxjs/
 ## Implementation Status
 
 ### ✅ Phase 1: Foundation (Complete - 64/64 tests passing)
-### 🔄 Phase 2: Transformation Operators (In Progress - 50/50 tests passing)
+### ✅ Phase 2: Transformation Operators (Complete - 83/83 tests passing)
 
 #### Step 1: Observable & Subscriber Basics
 **Files:** `Observable.ts`, `Subscriber.ts`, `Subscription.ts`, `types.ts`
@@ -250,6 +252,67 @@ of(1, null, 2, undefined, 3)
 - Predicate error handling
 - Combining with map for powerful transformations
 
+#### Step 6: Scan & Reduce Operators
+**Files:** `operators/scan.ts`, `operators/reduce.ts`
+
+Stateful accumulation operators:
+- First operators that maintain internal state
+- Accumulate values using accumulator function
+- scan: emits after every value (running total)
+- reduce: emits only on complete (final total)
+
+**Key Patterns:**
+```typescript
+// Running sum with scan
+of(1, 2, 3, 4, 5)
+  .pipe(scan((acc, x) => acc + x, 0))
+  .subscribe(console.log);
+// Output: 1, 3, 6, 10, 15 (progressive)
+
+// Final sum with reduce
+of(1, 2, 3, 4, 5)
+  .pipe(reduce((acc, x) => acc + x, 0))
+  .subscribe(console.log);
+// Output: 15 (final only)
+
+// Building array with scan
+of(1, 2, 3)
+  .pipe(scan((acc, x) => [...acc, x], []))
+  .subscribe(console.log);
+// Output: [1], [1,2], [1,2,3]
+
+// State management with scan
+actions$.pipe(
+  scan((state, action) => {
+    switch (action.type) {
+      case 'INCREMENT': return { ...state, count: state.count + 1 };
+      case 'RESET': return { ...state, count: 0 };
+      default: return state;
+    }
+  }, { count: 0 })
+)
+
+// Find maximum with reduce
+of(3, 7, 2, 9, 1, 5)
+  .pipe(reduce((max, x) => Math.max(max, x), -Infinity))
+  .subscribe(console.log);
+// Output: 9
+```
+
+**scan vs reduce:**
+| Aspect | scan | reduce |
+|--------|------|--------|
+| Emits | After every value | Only on complete |
+| Count | N emissions | 1 emission |
+| Use | Running totals | Final aggregation |
+
+**Key Learnings:**
+- Stateful operator pattern
+- Accumulator function design
+- When to use scan vs reduce
+- State management patterns
+- Progressive vs final calculations
+
 ---
 
 ## Running Tests
@@ -264,6 +327,7 @@ npm test -- step2-creation
 npm test -- step3-pipe
 npm test -- step4-map
 npm test -- step5-filter
+npm test -- step6-scan-reduce
 
 # Watch mode
 npm run test:watch
@@ -367,10 +431,13 @@ for (const v of values) {
 
 ## Next Steps
 
-**Phase 2: Transformation Operators** (In Progress)
+**Phase 2: Transformation Operators** (Complete)
 - ✅ Step 4: Map operator
 - ✅ Step 5: Filter operator
-- Step 6: Scan & Reduce operators (next)
+- ✅ Step 6: Scan & Reduce operators
+
+**Phase 3: Filtering & Utility Operators** (Next)
+- Step 7: Take, Skip, and First/Last
 
 See [CLAUDE.md](../CLAUDE.md) for full roadmap and progress.
 
@@ -390,7 +457,8 @@ See [CLAUDE.md](../CLAUDE.md) for full roadmap and progress.
 | Pipe Operator | 18 | ✅ All passing |
 | Map Operator | 20 | ✅ All passing |
 | Filter Operator | 30 | ✅ All passing |
-| **Total** | **114** | **✅ 100%** |
+| Scan & Reduce | 33 | ✅ All passing |
+| **Total** | **147** | **✅ 100%** |
 
 ---
 
