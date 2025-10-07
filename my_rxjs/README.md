@@ -20,7 +20,8 @@ my_rxjs/
 │   │   └── fromEvent.ts   # DOM event observables
 │   │
 │   ├── operators/         # Transformation & filtering operators
-│   │   └── map.ts         # Transform values with projection function
+│   │   ├── map.ts         # Transform values with projection function
+│   │   └── filter.ts      # Conditionally emit values based on predicate
 │   ├── subjects/          # Subjects (coming soon)
 │   └── index.ts           # Public API exports
 │
@@ -33,7 +34,7 @@ my_rxjs/
 ## Implementation Status
 
 ### ✅ Phase 1: Foundation (Complete - 64/64 tests passing)
-### 🔄 Phase 2: Transformation Operators (In Progress - 20/20 tests passing)
+### 🔄 Phase 2: Transformation Operators (In Progress - 50/50 tests passing)
 
 #### Step 1: Observable & Subscriber Basics
 **Files:** `Observable.ts`, `Subscriber.ts`, `Subscription.ts`, `types.ts`
@@ -189,6 +190,66 @@ export function operatorName<T, R>(config): OperatorFunction<T, R> {
 - Subscription forwarding for cleanup
 - Type safety with generics
 
+#### Step 5: Filter Operator
+**Files:** `operators/filter.ts`
+
+Conditional emission based on predicate:
+- Emit only values that pass a test
+- Type preservation (T → T)
+- Index tracking for all values (even filtered)
+- Same pattern as map, but with conditional emission
+
+**Key Patterns:**
+```typescript
+// Basic filtering
+of(1, 2, 3, 4, 5)
+  .pipe(filter(x => x > 2))
+  .subscribe(console.log); // 3, 4, 5
+
+// Filter by type/property
+of(
+  { name: 'Alice', age: 25 },
+  { name: 'Bob', age: 30 },
+  { name: 'Charlie', age: 20 }
+)
+  .pipe(filter(x => x.age >= 25))
+  .subscribe(console.log); // Alice, Bob
+
+// Filter with index
+of('a', 'b', 'c', 'd', 'e')
+  .pipe(filter((value, index) => index % 2 === 0))
+  .subscribe(console.log); // 'a', 'c', 'e'
+
+// Chaining map and filter
+of(1, 2, 3, 4, 5)
+  .pipe(
+    map(x => x * 2),     // 2, 4, 6, 8, 10
+    filter(x => x > 5),  // 6, 8, 10
+    map(x => `${x}`)     // "6", "8", "10"
+  )
+  .subscribe(console.log);
+
+// Remove null/undefined
+of(1, null, 2, undefined, 3)
+  .pipe(filter(x => x != null))
+  .subscribe(console.log); // 1, 2, 3
+```
+
+**Map vs Filter:**
+| Aspect | map | filter |
+|--------|-----|--------|
+| Purpose | Transform | Conditionally emit |
+| Output | Every value (transformed) | Only passing values |
+| Type | T → R (can change) | T → T (same) |
+| Logic | `s.next(transform(v))` | `if (test(v)) s.next(v)` |
+
+**Key Learnings:**
+- Conditional emission pattern
+- Type preservation semantics
+- Index behavior (increments for all values)
+- Predicate error handling
+- Combining with map for powerful transformations
+
 ---
 
 ## Running Tests
@@ -202,6 +263,7 @@ npm test -- step1-core
 npm test -- step2-creation
 npm test -- step3-pipe
 npm test -- step4-map
+npm test -- step5-filter
 
 # Watch mode
 npm run test:watch
@@ -307,8 +369,8 @@ for (const v of values) {
 
 **Phase 2: Transformation Operators** (In Progress)
 - ✅ Step 4: Map operator
-- Step 5: Filter operator (next)
-- Step 6: Scan & Reduce operators
+- ✅ Step 5: Filter operator
+- Step 6: Scan & Reduce operators (next)
 
 See [CLAUDE.md](../CLAUDE.md) for full roadmap and progress.
 
@@ -327,7 +389,8 @@ See [CLAUDE.md](../CLAUDE.md) for full roadmap and progress.
 | Creation Functions | 22 | ✅ All passing |
 | Pipe Operator | 18 | ✅ All passing |
 | Map Operator | 20 | ✅ All passing |
-| **Total** | **84** | **✅ 100%** |
+| Filter Operator | 30 | ✅ All passing |
+| **Total** | **114** | **✅ 100%** |
 
 ---
 
