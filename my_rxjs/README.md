@@ -27,7 +27,9 @@ my_rxjs/
 │   │   ├── take.ts        # Take first N values then complete
 │   │   ├── skip.ts        # Skip first N values, emit rest
 │   │   ├── first.ts       # Emit only first value
-│   │   └── last.ts        # Buffer last value, emit on complete
+│   │   ├── last.ts        # Buffer last value, emit on complete
+│   │   ├── distinct.ts    # Remove ALL duplicates
+│   │   └── distinctUntilChanged.ts  # Remove consecutive duplicates
 │   ├── subjects/          # Subjects (coming soon)
 │   └── index.ts           # Public API exports
 │
@@ -38,14 +40,15 @@ my_rxjs/
     ├── step4-map.test.ts            # 20 tests - Map operator
     ├── step5-filter.test.ts         # 30 tests - Filter operator
     ├── step6-scan-reduce.test.ts    # 33 tests - Scan & Reduce
-    └── step7-take-skip-first-last.test.ts  # 38 tests - Take, Skip, First, Last
+    ├── step7-take-skip-first-last.test.ts  # 38 tests - Take, Skip, First, Last
+    └── step8-distinct.test.ts       # 34 tests - Distinct & DistinctUntilChanged
 ```
 
 ## Implementation Status
 
 ### ✅ Phase 1: Foundation (Complete - 64/64 tests passing)
 ### ✅ Phase 2: Transformation Operators (Complete - 57/57 tests passing)
-### 🚧 Phase 3: Filtering & Utility Operators (In Progress - 38/38 tests passing)
+### ✅ Phase 3: Filtering & Utility Operators (Complete - 72/72 tests passing)
 
 #### Step 1: Observable & Subscriber Basics
 **Files:** `Observable.ts`, `Subscriber.ts`, `Subscription.ts`, `types.ts`
@@ -338,6 +341,7 @@ npm test -- step4-map
 npm test -- step5-filter
 npm test -- step6-scan-reduce
 npm test -- step7-take-skip-first-last
+npm test -- step8-distinct
 
 # Watch mode
 npm run test:watch
@@ -497,9 +501,66 @@ of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
 ## Next Steps
 
-**Phase 3: Filtering & Utility Operators** (In Progress)
+#### Step 8: Distinct & DistinctUntilChanged
+**Files:** `operators/distinct.ts`, `operators/distinctUntilChanged.ts`
+
+Remove duplicate values:
+- Two different deduplication strategies
+- Set-based tracking vs single value tracking
+- Memory tradeoffs: O(n) vs O(1)
+- KeySelector and custom comparators
+
+**Key Patterns:**
+```typescript
+// distinct() - Remove ALL duplicates
+of(1, 2, 1, 3, 2, 4)
+  .pipe(distinct())
+  .subscribe(console.log); // 1, 2, 3, 4
+
+// With keySelector for objects
+of(
+  { id: 1, name: 'Alice' },
+  { id: 2, name: 'Bob' },
+  { id: 1, name: 'Alice Again' }
+)
+  .pipe(distinct(user => user.id))
+  .subscribe(console.log); // Alice, Bob
+
+// distinctUntilChanged() - Remove CONSECUTIVE duplicates
+of(1, 1, 2, 2, 2, 3, 3, 1, 1)
+  .pipe(distinctUntilChanged())
+  .subscribe(console.log); // 1, 2, 3, 1
+
+// Custom comparator
+state$.pipe(
+  distinctUntilChanged((prev, curr) => prev.id === curr.id)
+)
+```
+
+**Comparison:**
+| Aspect | distinct() | distinctUntilChanged() |
+|--------|-----------|------------------------|
+| Checks Against | All previous | Only previous |
+| Memory | O(n) | O(1) |
+| Input: `1,2,1,3,2` | Output: `1,2,3` | Output: `1,2,1,3,2` |
+| Input: `1,1,2,2,1` | Output: `1,2` | Output: `1,2,1` |
+
+**Key Learnings:**
+- Set-based tracking with keySelector pattern
+- hasValue flag ensures first value always emits
+- Strict equality (`===`) by default
+- Memory considerations for infinite streams
+
+---
+
+## Next Steps
+
+**Phase 3: Filtering & Utility Operators** (Complete)
 - ✅ Step 7: Take, Skip, First, Last
-- Step 8: Distinct & DistinctUntilChanged (Next)
+- ✅ Step 8: Distinct & DistinctUntilChanged
+
+**Phase 4: Combination Operators** (Next)
+- Step 9: Merge
 
 See [CLAUDE.md](../CLAUDE.md) for full roadmap and progress.
 
@@ -521,7 +582,8 @@ See [CLAUDE.md](../CLAUDE.md) for full roadmap and progress.
 | Filter Operator | 30 | ✅ All passing |
 | Scan & Reduce | 33 | ✅ All passing |
 | Take, Skip, First, Last | 38 | ✅ All passing |
-| **Total** | **185** | **✅ 100%** |
+| Distinct & DistinctUntilChanged | 34 | ✅ All passing |
+| **Total** | **219** | **✅ 100%** |
 
 ---
 
