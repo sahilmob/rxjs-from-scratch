@@ -1,16 +1,16 @@
-import { describe, it, expect, vi } from 'vitest';
-import { Observable } from '../src/core/Observable';
-import { of } from '../src/observable/of';
-import { combineLatest } from '../src/observable/combineLatest';
-import { withLatestFrom } from '../src/operators/withLatestFrom';
+import { describe, it, expect, vi } from "vitest";
+import { Observable } from "../src/core/Observable";
+import { of } from "../src/observable/of";
+import { combineLatest } from "../src/observable/combineLatest";
+import { withLatestFrom } from "../src/operators/withLatestFrom";
 
-describe('Step 11: CombineLatest & WithLatestFrom', () => {
-  describe('combineLatest()', () => {
-    it('should combine latest values from two observables', () => {
+describe("Step 11: CombineLatest & WithLatestFrom", () => {
+  describe("combineLatest()", () => {
+    it("should combine latest values from two observables", () => {
       const results: any[] = [];
 
       const a$ = of(1, 2, 3);
-      const b$ = of('a', 'b');
+      const b$ = of("a", "b");
 
       combineLatest([a$, b$]).subscribe({
         next: (v) => results.push(v),
@@ -21,23 +21,23 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       expect(results[0]).toEqual([expect.any(Number), expect.any(String)]);
     });
 
-    it('should wait for all observables to emit before emitting', () => {
+    it("should wait for all observables to emit before emitting", () => {
       const results: any[] = [];
       const emissions: string[] = [];
 
       const a$ = new Observable<number>((subscriber) => {
-        emissions.push('a1');
+        emissions.push("a1");
         subscriber.next(1);
-        emissions.push('a2');
+        emissions.push("a2");
         subscriber.next(2);
         subscriber.complete();
       });
 
       const b$ = new Observable<string>((subscriber) => {
-        emissions.push('b1');
-        subscriber.next('x');
-        emissions.push('b2');
-        subscriber.next('y');
+        emissions.push("b1");
+        subscriber.next("x");
+        emissions.push("b2");
+        subscriber.next("y");
         subscriber.complete();
       });
 
@@ -51,11 +51,11 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       expect(results[0]).toHaveLength(2);
     });
 
-    it('should emit when any observable emits after initial', () => {
+    it("should emit when any observable emits after initial", () => {
       const results: [number, string][] = [];
 
       const a$ = of(1, 2);
-      const b$ = of('a');
+      const b$ = of("a");
 
       combineLatest([a$, b$]).subscribe({
         next: (v) => results.push(v as [number, string]),
@@ -64,15 +64,15 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       // Should have multiple emissions
       expect(results.length).toBeGreaterThanOrEqual(2);
       // Should contain latest values
-      expect(results).toContainEqual([1, 'a']);
-      expect(results).toContainEqual([2, 'a']);
+      expect(results).toContainEqual([1, "a"]);
+      expect(results).toContainEqual([2, "a"]);
     });
 
-    it('should emit array of all latest values', () => {
+    it("should emit array of all latest values", () => {
       const results: any[][] = [];
 
       const a$ = of(1, 2, 3);
-      const b$ = of('a', 'b', 'c');
+      const b$ = of("a", "b", "c");
 
       combineLatest([a$, b$]).subscribe({
         next: (v) => results.push(v),
@@ -82,16 +82,16 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       results.forEach((result) => {
         expect(result).toBeInstanceOf(Array);
         expect(result).toHaveLength(2);
-        expect(typeof result[0]).toBe('number');
-        expect(typeof result[1]).toBe('string');
+        expect(typeof result[0]).toBe("number");
+        expect(typeof result[1]).toBe("string");
       });
     });
 
-    it('should complete when all observables complete', () => {
+    it("should complete when all observables complete", () => {
       let completed = false;
 
       const a$ = of(1, 2);
-      const b$ = of('a', 'b');
+      const b$ = of("a", "b");
 
       combineLatest([a$, b$]).subscribe({
         complete: () => {
@@ -102,11 +102,11 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       expect(completed).toBe(true);
     });
 
-    it('should work with three observables', () => {
+    it("should work with three observables", () => {
       const results: any[] = [];
 
       const a$ = of(1);
-      const b$ = of('a');
+      const b$ = of("a");
       const c$ = of(true);
 
       combineLatest([a$, b$, c$]).subscribe({
@@ -114,10 +114,10 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       });
 
       expect(results.length).toBeGreaterThan(0);
-      expect(results[0]).toEqual([1, 'a', true]);
+      expect(results[0]).toEqual([1, "a", true]);
     });
 
-    it('should handle single observable', () => {
+    it("should handle single observable", () => {
       const results: any[] = [];
 
       combineLatest([of(1, 2, 3)]).subscribe({
@@ -127,7 +127,7 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       expect(results).toEqual([[1], [2], [3]]);
     });
 
-    it('should handle empty array', () => {
+    it("should handle empty array", () => {
       const results: any[] = [];
       let completed = false;
 
@@ -142,12 +142,12 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       expect(completed).toBe(true);
     });
 
-    it('should propagate errors from any observable', () => {
+    it("should propagate errors from any observable", () => {
       let errorReceived: any;
 
       const error$ = new Observable((subscriber) => {
         subscriber.next(1);
-        subscriber.error(new Error('Test error'));
+        subscriber.error(new Error("Test error"));
       });
 
       const other$ = of(2, 3);
@@ -159,10 +159,10 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       });
 
       expect(errorReceived).toBeInstanceOf(Error);
-      expect(errorReceived.message).toBe('Test error');
+      expect(errorReceived.message).toBe("Test error");
     });
 
-    it('should emit latest values when any source emits', () => {
+    it("should emit latest values when any source emits", () => {
       const results: [number, string][] = [];
 
       const a$ = new Observable<number>((subscriber) => {
@@ -173,7 +173,7 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       });
 
       const b$ = new Observable<string>((subscriber) => {
-        subscriber.next('a');
+        subscriber.next("a");
         subscriber.complete();
       });
 
@@ -183,18 +183,18 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
 
       // Should emit for each a$ emission after both have emitted
       expect(results.length).toBeGreaterThanOrEqual(3);
-      expect(results).toContainEqual([1, 'a']);
-      expect(results).toContainEqual([2, 'a']);
-      expect(results).toContainEqual([3, 'a']);
+      expect(results).toContainEqual([1, "a"]);
+      expect(results).toContainEqual([2, "a"]);
+      expect(results).toContainEqual([3, "a"]);
     });
 
-    it('should not emit until all have emitted at least once', () => {
+    it("should not emit until all have emitted at least once", () => {
       const results: any[] = [];
 
       const fast$ = of(1, 2, 3);
       const slow$ = new Observable<string>((subscriber) => {
         setTimeout(() => {
-          subscriber.next('slow');
+          subscriber.next("slow");
           subscriber.complete();
         }, 10);
       });
@@ -209,11 +209,11 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       setTimeout(() => {
         // Now should have emitted
         expect(results.length).toBeGreaterThan(0);
-        expect(results[0]).toContain('slow');
+        expect(results[0]).toContain("slow");
       }, 20);
     });
 
-    it('should unsubscribe from all observables', () => {
+    it("should unsubscribe from all observables", () => {
       const unsubscribe1 = vi.fn();
       const unsubscribe2 = vi.fn();
 
@@ -234,7 +234,7 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       expect(unsubscribe2).toHaveBeenCalled();
     });
 
-    it('should handle multiple emissions maintaining latest state', () => {
+    it("should handle multiple emissions maintaining latest state", () => {
       const results: [number, string][] = [];
 
       const a$ = new Observable<number>((subscriber) => {
@@ -244,8 +244,8 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       });
 
       const b$ = new Observable<string>((subscriber) => {
-        subscriber.next('x'); // [1, 'x'] or [2, 'x']
-        subscriber.next('y'); // [2, 'y']
+        subscriber.next("x"); // [1, 'x'] or [2, 'x']
+        subscriber.next("y"); // [2, 'y']
         subscriber.complete();
       });
 
@@ -258,14 +258,14 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       // Last emission should have latest from both
       const last = results[results.length - 1];
       expect(last[0]).toBe(2);
-      expect(last[1]).toBe('y');
+      expect(last[1]).toBe("y");
     });
 
-    it('should work with observables of different types', () => {
+    it("should work with observables of different types", () => {
       const results: [number, string, boolean][] = [];
 
       const numbers$ = of(1, 2);
-      const strings$ = of('a');
+      const strings$ = of("a");
       const booleans$ = of(true, false);
 
       combineLatest([numbers$, strings$, booleans$]).subscribe({
@@ -274,19 +274,19 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
 
       expect(results.length).toBeGreaterThan(0);
       results.forEach((result) => {
-        expect(typeof result[0]).toBe('number');
-        expect(typeof result[1]).toBe('string');
-        expect(typeof result[2]).toBe('boolean');
+        expect(typeof result[0]).toBe("number");
+        expect(typeof result[1]).toBe("string");
+        expect(typeof result[2]).toBe("boolean");
       });
     });
   });
 
-  describe('withLatestFrom()', () => {
-    it('should combine source with latest from other observables', () => {
+  describe("withLatestFrom()", () => {
+    it("should combine source with latest from other observables", () => {
       const results: any[] = [];
 
       const source$ = of(1, 2, 3);
-      const other$ = of('a', 'b', 'c');
+      const other$ = of("a", "b", "c");
 
       source$.pipe(withLatestFrom(other$)).subscribe({
         next: (v) => results.push(v),
@@ -297,7 +297,7 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       expect(results[0]).toHaveLength(2);
     });
 
-    it('should only emit when source emits', () => {
+    it("should only emit when source emits", () => {
       const results: [number, string][] = [];
       const sourceEmissions: number[] = [];
       const otherEmissions: string[] = [];
@@ -311,12 +311,12 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       });
 
       const other$ = new Observable<string>((subscriber) => {
-        otherEmissions.push('a');
-        subscriber.next('a');
-        otherEmissions.push('b');
-        subscriber.next('b');
-        otherEmissions.push('c');
-        subscriber.next('c');
+        otherEmissions.push("a");
+        subscriber.next("a");
+        otherEmissions.push("b");
+        subscriber.next("b");
+        otherEmissions.push("c");
+        subscriber.next("c");
         subscriber.complete();
       });
 
@@ -328,7 +328,7 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       expect(results.length).toBe(sourceEmissions.length);
     });
 
-    it('should sample latest value from other observable', () => {
+    it("should sample latest value from other observable", () => {
       const results: [number, string][] = [];
 
       const source$ = new Observable<number>((subscriber) => {
@@ -338,9 +338,9 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       });
 
       const other$ = new Observable<string>((subscriber) => {
-        subscriber.next('a');
-        subscriber.next('b');
-        subscriber.next('c');
+        subscriber.next("a");
+        subscriber.next("b");
+        subscriber.next("c");
         subscriber.complete();
       });
 
@@ -354,7 +354,7 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       expect(results[1][0]).toBe(2);
     });
 
-    it('should not emit until all observables have emitted', () => {
+    it("should not emit until all observables have emitted", () => {
       const results: any[] = [];
 
       const source$ = new Observable<number>((subscriber) => {
@@ -367,7 +367,7 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
 
       const other$ = new Observable<string>((subscriber) => {
         setTimeout(() => {
-          subscriber.next('a');
+          subscriber.next("a");
           subscriber.complete();
         }, 5);
       });
@@ -382,16 +382,16 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       setTimeout(() => {
         // Second source emission after other - should have output
         expect(results.length).toBe(1);
-        expect(results[0]).toEqual([2, 'a']);
+        expect(results[0]).toEqual([2, "a"]);
       }, 20);
     });
 
-    it('should complete when source completes', () => {
+    it("should complete when source completes", () => {
       let completed = false;
 
       const source$ = of(1, 2);
       const other$ = new Observable((subscriber) => {
-        subscriber.next('a');
+        subscriber.next("a");
         // Never completes!
       });
 
@@ -405,11 +405,11 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       expect(completed).toBe(true);
     });
 
-    it('should work with multiple other observables', () => {
+    it("should work with multiple other observables", () => {
       const results: [number, string, boolean][] = [];
 
       const source$ = of(1, 2);
-      const other1$ = of('a', 'b');
+      const other1$ = of("a", "b");
       const other2$ = of(true, false);
 
       source$.pipe(withLatestFrom(other1$, other2$)).subscribe({
@@ -419,21 +419,21 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       expect(results.length).toBeGreaterThan(0);
       results.forEach((result) => {
         expect(result).toHaveLength(3);
-        expect(typeof result[0]).toBe('number');
-        expect(typeof result[1]).toBe('string');
-        expect(typeof result[2]).toBe('boolean');
+        expect(typeof result[0]).toBe("number");
+        expect(typeof result[1]).toBe("string");
+        expect(typeof result[2]).toBe("boolean");
       });
     });
 
-    it('should propagate errors from source', () => {
+    it("should propagate errors from source", () => {
       let errorReceived: any;
 
       const source$ = new Observable((subscriber) => {
         subscriber.next(1);
-        subscriber.error(new Error('Source error'));
+        subscriber.error(new Error("Source error"));
       });
 
-      const other$ = of('a');
+      const other$ = of("a");
 
       source$.pipe(withLatestFrom(other$)).subscribe({
         error: (err) => {
@@ -442,16 +442,16 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       });
 
       expect(errorReceived).toBeInstanceOf(Error);
-      expect(errorReceived.message).toBe('Source error');
+      expect(errorReceived.message).toBe("Source error");
     });
 
-    it('should propagate errors from other observables', () => {
+    it("should propagate errors from other observables", () => {
       let errorReceived: any;
 
       const source$ = of(1, 2, 3);
       const other$ = new Observable((subscriber) => {
-        subscriber.next('a');
-        subscriber.error(new Error('Other error'));
+        subscriber.next("a");
+        subscriber.error(new Error("Other error"));
       });
 
       source$.pipe(withLatestFrom(other$)).subscribe({
@@ -461,10 +461,10 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       });
 
       expect(errorReceived).toBeInstanceOf(Error);
-      expect(errorReceived.message).toBe('Other error');
+      expect(errorReceived.message).toBe("Other error");
     });
 
-    it('should work with no other observables', () => {
+    it("should work with no other observables", () => {
       const results: any[] = [];
 
       of(1, 2, 3)
@@ -477,7 +477,7 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       expect(results).toEqual([1, 2, 3]);
     });
 
-    it('should unsubscribe from all observables', () => {
+    it("should unsubscribe from all observables", () => {
       const sourceUnsub = vi.fn();
       const otherUnsub = vi.fn();
 
@@ -487,7 +487,7 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       });
 
       const other$ = new Observable((subscriber) => {
-        subscriber.next('a');
+        subscriber.next("a");
         return otherUnsub;
       });
 
@@ -498,7 +498,7 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       expect(otherUnsub).toHaveBeenCalled();
     });
 
-    it('should maintain latest values across source emissions', () => {
+    it("should maintain latest values across source emissions", () => {
       const results: [number, string][] = [];
 
       const source$ = new Observable<number>((subscriber) => {
@@ -509,9 +509,9 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       });
 
       const other$ = new Observable<string>((subscriber) => {
-        subscriber.next('a');
-        subscriber.next('b');
-        subscriber.next('c');
+        subscriber.next("a");
+        subscriber.next("b");
+        subscriber.next("c");
         subscriber.complete();
       });
 
@@ -526,13 +526,13 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
     });
   });
 
-  describe('Integration: Comparing combineLatest and withLatestFrom', () => {
-    it('combineLatest emits on any source, withLatestFrom only on main source', () => {
+  describe("Integration: Comparing combineLatest and withLatestFrom", () => {
+    it("combineLatest emits on any source, withLatestFrom only on main source", () => {
       const combineResults: any[] = [];
       const withLatestResults: any[] = [];
 
       const main$ = of(1, 2);
-      const other$ = of('a', 'b', 'c');
+      const other$ = of("a", "b", "c");
 
       // combineLatest emits when ANY emits
       combineLatest([main$, other$]).subscribe({
@@ -550,14 +550,14 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       );
     });
 
-    it('both wait for all observables to emit before first emission', () => {
+    it("both wait for all observables to emit before first emission", () => {
       const combineResults: any[] = [];
       const withLatestResults: any[] = [];
 
       const fast$ = of(1, 2, 3);
       const slow$ = new Observable<string>((subscriber) => {
         setTimeout(() => {
-          subscriber.next('slow');
+          subscriber.next("slow");
           subscriber.complete();
         }, 10);
       });
@@ -580,7 +580,7 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
       }, 20);
     });
 
-    it('combineLatest for reactive state updates, withLatestFrom for triggered actions', () => {
+    it("combineLatest for reactive state updates, withLatestFrom for triggered actions", () => {
       const stateUpdates: any[] = [];
       const actions: any[] = [];
 
@@ -594,8 +594,8 @@ describe('Step 11: CombineLatest & WithLatestFrom', () => {
 
       // User clicks occasionally
       const click$ = new Observable<string>((subscriber) => {
-        subscriber.next('click1');
-        subscriber.next('click2');
+        subscriber.next("click1");
+        subscriber.next("click2");
         subscriber.complete();
       });
 

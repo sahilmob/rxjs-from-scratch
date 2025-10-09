@@ -43,5 +43,5 @@ export { concatWith } from './operators/concatWith';
 export { concatAll } from './operators/concatAll';
 export { withLatestFrom } from './operators/withLatestFrom';
 
-// Subjects (to be implemented)
-// export { Subject } from './subjects/Subject';
+// Subjects
+export { Subject } from './subjects/Subject';

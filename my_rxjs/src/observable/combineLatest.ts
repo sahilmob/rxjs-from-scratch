@@ -96,7 +96,6 @@ export function combineLatest<T>(
         allEmitted = emitted.every((v) => v === true);
         if (allEmitted) {
           s.next([...values]);
-          allEmitted = true; // Ensure we don't check again
         }
       }
     };
@@ -111,9 +110,8 @@ export function combineLatest<T>(
     observables.forEach((obs, i) => {
       const sub = obs.subscribe({
         next: (v) => {
-          values[i] = v;
           emitted[i] = true;
-
+          values[i] = v;
           if (inSetupPhase) {
             // Buffer emission during setup
             buffer.push({ index: i, value: v });
