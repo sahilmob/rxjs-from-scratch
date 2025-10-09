@@ -19,6 +19,7 @@ export { of } from './observable/of';
 export { from } from './observable/from';
 export { fromEvent } from './observable/fromEvent';
 export { merge } from './observable/merge';
+export { concat } from './observable/concat';
 
 // Transformation operators
 export { map } from './operators/map';
@@ -37,6 +38,8 @@ export { distinctUntilChanged } from './operators/distinctUntilChanged';
 // Combination operators
 export { mergeWith } from './operators/mergeWith';
 export { mergeAll } from './operators/mergeAll';
+export { concatWith } from './operators/concatWith';
+export { concatAll } from './operators/concatAll';
 
 // Subjects (to be implemented)
 // export { Subject } from './subjects/Subject';
