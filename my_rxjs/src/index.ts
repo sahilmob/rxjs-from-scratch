@@ -20,6 +20,7 @@ export { from } from './observable/from';
 export { fromEvent } from './observable/fromEvent';
 export { merge } from './observable/merge';
 export { concat } from './observable/concat';
+export { combineLatest } from './observable/combineLatest';
 
 // Transformation operators
 export { map } from './operators/map';
@@ -40,6 +41,7 @@ export { mergeWith } from './operators/mergeWith';
 export { mergeAll } from './operators/mergeAll';
 export { concatWith } from './operators/concatWith';
 export { concatAll } from './operators/concatAll';
+export { withLatestFrom } from './operators/withLatestFrom';
 
 // Subjects (to be implemented)
 // export { Subject } from './subjects/Subject';
