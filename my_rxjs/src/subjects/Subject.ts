@@ -89,23 +89,82 @@ export class Subject<T> extends Observable<T> implements Observer<T> {
   // TODO: Implement Subject
   //
   // State to track:
-  // - observers: Observer<T>[] = []        // List of active subscribers
-  // - stopped: boolean = false             // Has error/complete been called?
-  // - hasError: boolean = false            // Did it error?
-  // - thrownError?: any                    // The error that was thrown
+  private observers: Observer<T>[] = []; // List of active subscribers
+  private stopped: boolean = false; // Has error/complete been called?
+  private hasError: boolean = false; // Did it error?
+  private thrownError?: any; // The error that was thrown
   //
   // Constructor:
+  constructor() {
+    super((s) => {
+      if (this.stopped) {
+        if (this.hasError) {
+          s.error(this.thrownError);
+        } else {
+          s.complete();
+        }
+      } else {
+        this.observers.push(s);
+
+        return () => {
+          const idx = this.observers.findIndex((sub) => sub === s);
+
+          if (idx > -1) {
+            this.observers.splice(idx, 1);
+          }
+        };
+      }
+    });
+  }
   // - Call super() with subscribe function
   // - Subscribe function should:
   //   - If stopped and hasError: immediately error the subscriber
   //   - If stopped and !hasError: immediately complete the subscriber
   //   - Otherwise: add observer to list, return unsubscribe function
   //
-  // next(value: T):
+  next(value: T) {
+    if (this.stopped) return;
+
+    // Make a copy to avoid issues if observer unsubscribes during iteration
+    const observers = [...this.observers];
+
+    observers.forEach((o) => {
+      try {
+        if (o.next) {
+          o.next(value);
+        }
+      } catch (error) {
+        // Observer errors should not affect other observers
+        // Just ignore or could log in production
+      }
+    });
+  }
   // - If stopped, return (ignore)
   // - Iterate through observers and call observer.next(value)
   // - Wrap in try-catch to handle observer errors
   //
+
+  error(err: any) {
+    if (this.stopped) return;
+    this.stopped = true;
+    this.hasError = true;
+    this.thrownError = err;
+
+    // Make a copy to avoid issues if observer unsubscribes during iteration
+    const observers = [...this.observers];
+    this.observers = [];
+
+    observers.forEach((o) => {
+      try {
+        if (o.error) {
+          o.error(err);
+        }
+      } catch (error) {
+        // Observer errors should not affect other observers
+        // Just ignore or could log in production
+      }
+    });
+  }
   // error(err: any):
   // - If stopped, return (ignore)
   // - Set stopped = true, hasError = true, thrownError = err
@@ -118,6 +177,25 @@ export class Subject<T> extends Observable<T> implements Observer<T> {
   // - Iterate through observers and call observer.complete()
   // - Clear observers array
   //
+  complete() {
+    if (this.stopped) return;
+    this.stopped = true;
+
+    // Make a copy to avoid issues if observer unsubscribes during iteration
+    const observers = [...this.observers];
+    this.observers = [];
+
+    observers.forEach((o) => {
+      try {
+        if (o.complete) {
+          o.complete();
+        }
+      } catch (error) {
+        // Observer errors should not affect other observers
+        // Just ignore or could log in production
+      }
+    });
+  }
   // IMPORTANT EDGE CASES:
   // - Subscribing after complete: should immediately complete
   // - Subscribing after error: should immediately error

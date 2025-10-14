@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { Subject } from "../src/subjects/Subject";
+import { Observable } from "../src/core/Observable";
 
-describe.skip("Step 12: Subject", () => {
+describe("Step 12: Subject", () => {
   describe("Basic Subject Behavior", () => {
     it("should be both Observable and Observer", () => {
       const subject = new Subject<number>();
@@ -338,7 +339,7 @@ describe.skip("Step 12: Subject", () => {
       subject
         .pipe(
           (source) =>
-            new (require("../src/core/Observable").Observable)((subscriber) =>
+            new Observable((subscriber) =>
               source.subscribe({
                 next: (x) => subscriber.next(x * 2),
                 error: (e) => subscriber.error(e),
@@ -364,7 +365,7 @@ describe.skip("Step 12: Subject", () => {
       subject
         .pipe(
           (source) =>
-            new (require("../src/core/Observable").Observable)((subscriber) =>
+            new Observable((subscriber) =>
               source.subscribe({
                 next: (x) => subscriber.next(x * 2),
                 error: (e) => subscriber.error(e),
@@ -377,7 +378,7 @@ describe.skip("Step 12: Subject", () => {
       subject
         .pipe(
           (source) =>
-            new (require("../src/core/Observable").Observable)((subscriber) =>
+            new Observable((subscriber) =>
               source.subscribe({
                 next: (x) => subscriber.next(x * 3),
                 error: (e) => subscriber.error(e),
@@ -451,7 +452,6 @@ describe.skip("Step 12: Subject", () => {
   describe("Comparison: Subject vs Observable", () => {
     it("should demonstrate unicast vs multicast behavior", () => {
       // Regular Observable - unicast (each subscriber gets independent execution)
-      const Observable = require("../src/core/Observable").Observable;
       let observableExecutions = 0;
       const observable = new Observable((subscriber) => {
         observableExecutions++;
@@ -481,7 +481,6 @@ describe.skip("Step 12: Subject", () => {
 
     it("should demonstrate cold vs hot behavior", () => {
       // Cold Observable - starts emitting when subscribed
-      const Observable = require("../src/core/Observable").Observable;
       const coldResults1: number[] = [];
       const coldResults2: number[] = [];
 
