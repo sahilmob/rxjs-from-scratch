@@ -41,3 +41,11 @@ export interface SubscriptionLike extends Unsubscribable {
   unsubscribe(): void;
   readonly closed: boolean;
 }
+
+/**
+ * An operator function that transforms one Observable into another
+ * This is the signature of all RxJS operators
+ */
+export interface OperatorFunction<T, R> {
+  (source: import("./Observable").Observable<T>): import("./Observable").Observable<R>;
+}
