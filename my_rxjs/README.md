@@ -1,3 +1,5 @@
+> Historical exercise guide: includes planned work, not a completion report. See the [repository README](../README.md) and [validation notes](../VALIDATION.md) for current status and working commands.
+
 # My RxJS Implementation
 
 A learning-focused implementation of RxJS core concepts, built from scratch to understand reactive programming.
